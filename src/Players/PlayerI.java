@@ -10,4 +10,7 @@ public interface PlayerI {
 	
 	public String getPlayerName();
 	
+	//Function to update the GUI board position:
+	public void updatePosition(PositionCellGame pos);
+	
 }

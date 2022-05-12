@@ -1,9 +1,7 @@
-package runners;
+package env;
 
-import Players.ConsolePlayer;
 import Players.PlayerI;
-import env.PositionCellGame;
-import env.SanityTestEnv;
+import Players.console.ConsolePlayer;
 
 public class MainGame {
 
@@ -44,6 +42,11 @@ public class MainGame {
 		PositionCellGame start = new PositionCellGame(true);
 		
 		PositionCellGame curPos = start;
+		sendPositionUpdate(curPos, players);
+
+		for(int j=0; j<2; j++) {
+			players[j].updatePosition(curPos);
+		}
 		
 		int curPlayerIndex = -1;
 		
@@ -67,6 +70,8 @@ public class MainGame {
 			System.out.println(players[curPlayerIndex] + " move: ");
 			
 			System.out.println(SanityTestEnv.convertMoveNumberToString(move));
+
+			sendPositionUpdate(curPos, players);
 			
 			isPlayer1Turn = !isPlayer1Turn;
 			
@@ -75,6 +80,8 @@ public class MainGame {
 		System.out.println("Final position:");
 		System.out.println(curPos);
 		
+		sendPositionUpdate(curPos, players);
+		
 		if(curPos.isPlayer1Winning()) {
 			System.out.println(players[curPlayerIndex] + " (i.e: Player 1) wins!");
 		} else {
@@ -82,6 +89,12 @@ public class MainGame {
 		}
 		
 		System.out.println("The end!");
+	}
+	
+	public static void sendPositionUpdate(PositionCellGame curPos, PlayerI players[]) {
+		for(int i=0; i<players.length; i++) {
+			players[i].updatePosition(curPos);
+		}
 	}
 
 }

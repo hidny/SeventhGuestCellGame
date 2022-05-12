@@ -8,9 +8,9 @@ public class PositionCellGame {
 	public static final int SIDE_LENGTH_CUBE = SIDE_LENGTH * SIDE_LENGTH_SQUARE;
 	public static final int SIDE_LENGTH_FORTH = SIDE_LENGTH * SIDE_LENGTH_CUBE;
 
-	private static final long EMPTY = 0;
-	private static final long P1_CELL = 1;
-	private static final long P2_CELL = 2;
+	public static final long EMPTY = 0;
+	public static final long P1_CELL = 1;
+	public static final long P2_CELL = 2;
 	private static final long HASH_LIMIT = (long)Math.pow(10,  18);
 
 	private static boolean hashMultSet = false;
@@ -126,6 +126,10 @@ public class PositionCellGame {
 	
 	private long board[][] = new long[SIDE_LENGTH][SIDE_LENGTH];
 	
+	public long[][] getBoard() {
+		return board;
+	}
+
 	private long curHash = 0L;
 	
 

@@ -1,35 +1,90 @@
-package Players;
+package Players.gui;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import Players.PlayerI;
+import Players.console.ConsolePlayer;
 import env.PositionCellGame;
-import env.SanityTestEnv;
+import gui.Board;
 
-public class ConsolePlayer implements PlayerI {
+public class GUIPlayer implements PlayerI {
 
 	private String playerName = "";
-	public ConsolePlayer(String name) {
-		this.playerName = name;
+	
+	private Board personalBoard = null;
+	
+	
+	public GUIPlayer(String playerName) {
+		this.playerName = playerName;
+		
+		
+		personalBoard = new Board(env.PositionCellGame.SIDE_LENGTH, env.PositionCellGame.SIDE_LENGTH);
+		
+		
+		personalBoard.displayMessage("Hello World! I wish I was a different font...");
+	  		   
 	}
 	
-	private Scanner in = new Scanner(System.in);
 	
 	@Override
 	public int getMove(PositionCellGame pos) {
 		
+		personalBoard.displayBoard(pos);
+		
+		//TODO: get move from the GUI/JPanel...
+		//TODO: don't do spin locks! That's lame! (See what I did for mellow)
+		int moveNumber = sanityGetMoveConsole(pos);
+		
 
-		boolean chosenMoveIsLegal = false;
+		ConsolePlayer.printMovesNoPos(pos);
+		
+		
+		
+		personalBoard.displayBoard(pos.move(moveNumber));
+		
+		return moveNumber;
+	}
+
+	
+	@Override
+	public String getPlayerName() {
+		return playerName;
+	}
+
+
+	@Override
+	public void updatePosition(PositionCellGame pos) {
+		personalBoard.displayBoard(pos);
+		
+		//TODO: check if the game is over and then display a message?
+		//You could do this later...
+	}
+	
+	//TODO: maybe update Position with move, so I can make an animation...
+	// I'll do it later!
+	
+	
+	
+	private Scanner intest = new Scanner(System.in);
+	
+	// Testing GUI by getting moves from the console.
+	// It seems to work.
+	private int sanityGetMoveConsole(PositionCellGame pos) {
+
 		int moveNumber = -1;
+		
+		boolean chosenMoveIsLegal = false;
+		
 		
 		do {
 			System.out.println("---------------");
-			printMovesNoPos(pos);
+			ConsolePlayer.printMovesNoPos(pos);
 	
 			System.out.println(pos);
 			
 			System.out.println("Please make a move from the above choices:");
-			String line = in.nextLine();
+			String line = intest.nextLine();
 			
 
 			//Try to avoid fat-fingering:
@@ -87,23 +142,4 @@ public class ConsolePlayer implements PlayerI {
 		return moveNumber;
 	}
 
-	
-	@Override
-	public String getPlayerName() {
-		return this.playerName;
-	}
-
-	
-
-	public static void printMovesNoPos(PositionCellGame pos) {
-		ArrayList<Integer> moves = pos.getMoveList(pos.isP1turn());
-		
-		System.out.println("Printing moves for the following position:");
-		System.out.println(pos);
-		System.out.println("Moves");
-		for(int i=0; i<moves.size(); i++) {
-			System.out.println(SanityTestEnv.convertMoveNumberToString(moves.get(i)));
-			
-		}
-	}
 }
