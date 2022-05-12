@@ -2,12 +2,11 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.concurrent.Semaphore;
 
 //This code was copied from hidny/CheckersAISept2013Revision
+//It was also lightly modified.
 
-/*TODO: Create a board listener and implement (kind of) the getClick() method.*/
-
-//2011 TODO: make the gui better by showing the user that he/she selected a block by highlighting it.
   
 public class BoardPanel extends JPanel implements MouseListener
   
@@ -46,6 +45,7 @@ public class BoardPanel extends JPanel implements MouseListener
 
   private String messageBoard; /*The message board on the bottom of the board*/
   private Color pegsColour[][];/*Records the colours of the pegs*/
+  private Color highlights[][];/*Records the colours of the cell in case we want to high-light it*/
   
   private boolean pegPlaced[][];/*Says if there's a peg placed at every area on the board.*/
   
@@ -55,6 +55,8 @@ public class BoardPanel extends JPanel implements MouseListener
   
   //I don't use it... but I might in the future...
   //private Graphics canvas;
+  
+
   
   public BoardPanel(int rows, int columns)
   {
@@ -71,6 +73,13 @@ public class BoardPanel extends JPanel implements MouseListener
       }
     }
     
+    highlights = new Color[rows][cols];
+    for(int i=0; i<rows; i++) {
+       for(int j=0; j<cols; j++) {
+        	highlights[i][j] = null; //Default no-highlight
+       }
+     }
+    
     pegPlaced = new boolean[rows][cols];
     
     for(int i=0; i<rows; i++) {
@@ -79,6 +88,8 @@ public class BoardPanel extends JPanel implements MouseListener
       }
     }
     
+    
+    this.addMouseListener(this);
     
   }
   
@@ -92,7 +103,11 @@ public class BoardPanel extends JPanel implements MouseListener
     /*Placing the squares on the board*/
     for(int i=0; i<this.rows; i++) {
       for(int j=0; j<this.cols; j++) {
-        if((i+j)%2 == 1) {
+    	  
+    	if(highlights[i][j] != null) {
+    	  canvas.setColor(highlights[i][j]);
+    	  
+    	} else if((i+j)%2 == 1) {
           canvas.setColor(GRID_COLOR_A);
         } else {
           canvas.setColor(GRID_COLOR_B);
@@ -145,6 +160,15 @@ public class BoardPanel extends JPanel implements MouseListener
     }
   }
   
+  public void highlight(Color theColour, int row, int col) {
+	  highlights[row][col] = theColour;
+	  repaint();
+  }
+  
+  public void removeHighlight(int row, int col) {
+	  highlights[row][col] = null;
+	  repaint();
+  }
 
   
   public void displayMessage(String theMessage)
@@ -157,22 +181,20 @@ public class BoardPanel extends JPanel implements MouseListener
   Coordinate coordinateThatTheUserReleasedOn;
   boolean coordinatePressed = false; /*A flag that says when the coordinate was been pressed.*/
   
-  
-   boolean coordinateClicked = false; /*A flag that says when the coordinate was been clicked.*/
    
-   /* @returns the coordinate that the user clicked on... If the coordinate is null, there will be some problems.*/
-   public Coordinate getCoordinateThatTheUserClickedOn() {
-	   if(coordinateClicked) {
-		   return coordinateThatTheUserPressedOn;
-	   } else {
-		   return null;
-	   }
-   }
-   /*@returns true if the user clicked a legal coordinate
-    * false otherwise
-    */
-   public boolean hasClickedonCoordinate() {
-    return  coordinateClicked;
+   //Semaphore strat copied from AIServers -> Mellow -> ClientPlayerDecider
+   private Semaphore semaphoreToCheckWhenMoveMadeByGUI = new Semaphore(0);
+   
+   public Coordinate getNextCoordinateClicked() {
+	   
+	 try {
+		semaphoreToCheckWhenMoveMadeByGUI.acquire();
+		
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	}
+	   
+	   return coordinateThatTheUserPressedOn;
    }
    
    /*After the coordinate has been used, the fact that the user clicked on a specific coordinate
@@ -180,8 +202,7 @@ public class BoardPanel extends JPanel implements MouseListener
    public void CoordinateUsed() {
 	 this.coordinatePressed = false;
 	 this.coordinateThatTheUserPressedOn = null;
-     this.coordinateClicked = false;
-     this.coordinateThatTheUserPressedOn = null;
+     this.coordinateThatTheUserReleasedOn = null;
    }
    /*
     * 
@@ -230,16 +251,14 @@ public class BoardPanel extends JPanel implements MouseListener
 	    if( coordinatePressed && x>=X_OFFSET && col< cols && y>=Y_OFFSET && row<rows ) { /*if it's a proper coordinate*/
 	    	coordinateThatTheUserReleasedOn = new Coordinate(row, col);
 	    	if(coordinateThatTheUserPressedOn.equals(coordinateThatTheUserPressedOn)) {
-	    		coordinateClicked = true;  /*instance that declares that the user has clicked on a coordinate. (if it is true)*/
+	    		
+	    		if (this.semaphoreToCheckWhenMoveMadeByGUI.availablePermits() < 1) {
+		    		this.semaphoreToCheckWhenMoveMadeByGUI.release();
+				}
 	    	}	
 	    }
 	    
-	   /* System.out.println(coordinateThatTheUserPressedOn);
-	    if(coordinateClicked) {
-	    	System.out.println("You clicked!");
-	    } else {
-	    	System.out.println("You didn't click!");
-	    }*/
   } 
+  
   
 }

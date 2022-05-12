@@ -59,6 +59,16 @@ public class MainGame {
 				curPlayerIndex = 1;
 				
 			}
+			
+			if(curPos.getMoveList().size() == 0) {
+				
+				//TODO: this is ugly. Rearrange it somehow.
+				System.out.println(players[curPlayerIndex].getPlayerName() + " has no moves to make.");
+				curPos = curPos.move(PositionCellGame.NO_MOVE_PASS_THE_TURN);
+				isPlayer1Turn = !isPlayer1Turn;
+				continue;
+			}
+			
 			System.out.println(players[curPlayerIndex].getPlayerName() + ", please make a move:");
 			System.out.println(curPos);
 			

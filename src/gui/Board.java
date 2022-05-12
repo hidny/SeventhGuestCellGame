@@ -5,11 +5,9 @@ import java.awt.*;
 import javax.swing.JFrame;
 
 //This code was copied from hidny/CheckersAISept2013Revision
+//It was also lightly modified.
 
-//TODO: Make a listener the correct way and implement waitForClick() properly
-//TODO: make this display the PositionCellGameBoard
 
-/*TODO: Create a board listener and implement (kind of) the getClick() method.*/
 public class Board
 {
   // Some colour presets
@@ -28,13 +26,15 @@ public class Board
   BoardPanel panel;
   
   public static int TITLE_BAR_HEIGHT = 25;/*The approximate Title bar size*/
-	
+
 	
   // Other instance variables
   int rows; /*****Maybe I could refer to the Board Panels rows and cols... (maybe)*/
   int columns;
   
   public static void main(String args[]) {
+	  
+
    Board b = new Board(10, 10);
    b.displayMessage("Hello World! I wish I was a different font...");
    b.putPeg(CYAN, 7, 1);
@@ -49,13 +49,26 @@ public class Board
    boolean imNotBored = true;
    
    while(imNotBored == true) {
-         Coordinate c =  b.waitForClick();
-         System.out.println("You have clicked on ("+ c.getRow() + ", "+ c.getCol() + ")");
+		
+        Coordinate c =  b.getNextCoordinateClicked();
+         
+        System.out.println("You have clicked on ("+ c.getRow() + ", "+ c.getCol() + ")");
    }
   }
   
+  public Coordinate getNextCoordinateClicked() {
+	  Coordinate ret = this.panel.getNextCoordinateClicked();
+	  
+	  if( ret == null) {
+		//Sanity check:
+		System.out.println("ERROR: The coordinate is equal to null!"); 
+	    panel.CoordinateUsed();
+	    return new Coordinate(-1, -1);
+	  }
+	  
+	  return ret;
+  }
   
-  //TODO: maybe customize the title?
   
   public Board(int rows, int columns)
   {
@@ -96,6 +109,14 @@ public class Board
 	  panel.removePeg(row, col);
   }
   
+  public void highlight(int row, int col) {
+	  panel.highlight(YELLOW, row, col);
+  }
+  
+  public void removeHighlight(int row, int col) {
+	  panel.removeHighlight(row, col);
+  }
+  
   public int getColumns()
   {
     return this.columns;
@@ -107,55 +128,7 @@ public class Board
   }
   
   
-  /*
-  * Calls on the listeners to wait for the user to click on a square.
-  * Once the user has clicked on a square
-  * 
-  * I honestly don't understand how I should use the Board Listener... :(
-  * I just use the mouse listener..
-  * 
-  * @return the coordinates of the square clicked.
-  */
   
-  
-  //TODO: make it more reactive... (See server implementation)
-  
-  public Coordinate waitForClick() {
-     /*adding the mouse listener*/
-    
-    //this.addBoardListener(this); ???
-    
-	  panel.addMouseListener(panel);
-    
-    /*This while loop simply waits for the user to click on a coordinate.*/
-    while(panel.hasClickedonCoordinate() == false) {
-      /*Do nothing.*/
-    	try {
-    		Thread.sleep(100);
-    	} catch(Exception e) {
-    		System.err.println("Tread sleep didn't work.");
-    		System.exit(1);
-    	}
-    }
-    
-    /*Since the user has clicked on coordinate, the program should no longer be listening for another click. Therefore, i'll turn the listener off.*/
-    panel.removeMouseListener(panel);
-    
-   //this.removeBoardListener(this); ??
-    
-    if(panel.getCoordinateThatTheUserClickedOn() != null) { /*This Condition that should always be true (unless there's a bug):*/
-      
-    	Coordinate coordinateClicked = panel.getCoordinateThatTheUserClickedOn(); /*gets the coordinate clicked*/
-     	panel.CoordinateUsed(); /*Tells the board panel that the coordinate that the user clicked has been saved.*/
-     
-     	return coordinateClicked; 
-    
-    } else {
-    	System.out.println("ERROR: The coordinate is equal to null!"); 
-    	panel.CoordinateUsed();
-    	return new Coordinate(-1, -1); /*These coordinates indicate that there's a problem.*/
-    }
-  }
   
   private static final Color P1Color = RED; 
   private static final Color P2Color = BLUE; 

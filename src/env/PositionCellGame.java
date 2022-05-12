@@ -12,6 +12,8 @@ public class PositionCellGame {
 	public static final long P1_CELL = 1;
 	public static final long P2_CELL = 2;
 	private static final long HASH_LIMIT = (long)Math.pow(10,  18);
+	
+	public static final int NO_MOVE_PASS_THE_TURN = -1;
 
 	private static boolean hashMultSet = false;
 	private static long hashMult[][] = new long[SIDE_LENGTH][SIDE_LENGTH];
