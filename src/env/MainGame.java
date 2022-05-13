@@ -18,7 +18,11 @@ public class MainGame {
 
 	//TODO: make the A* AI prioritize moving to the from location of where the opponent just
 	//      jumped from. (That's usually a good move)
-	//TODO: make the A* AI prioritize the prev depth's favorite 3?
+	//TODO: make the A* AI prioritize the prev depth's favorite 3? 
+	//     (Maybe do this for the first 3 moves, because the earlier it's done, the better...)
+	
+	//"Over time, other improvements have been suggested, and indeed the Falphabeta (fail-soft alpha–beta) idea of John Fishburn is nearly universal and is already incorporated above in a slightly modified form. Fishburn also suggested a combination of the killer heuristic and zero-window search under the name Lalphabeta ("last move with minimal window alpha–beta search")."
+	//Maybe this a 0-window later?
 	
 	//TODO: maybe if there's the same position twice, it's a draw?
 	

@@ -201,6 +201,54 @@ public class PositionCellGame {
 		
 	}
 	
+	public ArrayList<Integer> getMoveListReduced(boolean isPlayer1Turn) {
+		long curColour = -1;
+		if(isPlayer1Turn) {
+			curColour = P1_CELL;
+		} else {
+			curColour = P2_CELL;
+		}
+		
+		ArrayList<Integer> ret = new ArrayList<Integer>();
+		
+		boolean cloneMoveLandingsFound[][] = new boolean[SIDE_LENGTH][SIDE_LENGTH];
+		
+		for(int isrc=0; isrc<SIDE_LENGTH; isrc++) {
+			for(int jsrc=0; jsrc<SIDE_LENGTH; jsrc++) {
+				
+				if(board[isrc][jsrc] == curColour) {
+					
+					int firstPartMoveNumber = SIDE_LENGTH_SQUARE * (isrc * SIDE_LENGTH + jsrc);
+					
+					for(int idest=Math.max(isrc-2, 0); idest <= Math.min(isrc + 2, SIDE_LENGTH-1); idest++ ) {
+						for(int jdest=Math.max(jsrc-2, 0); jdest <= Math.min(jsrc + +2, SIDE_LENGTH-1); jdest++) {
+							
+							if(board[idest][jdest] == EMPTY) {
+								
+								if(Math.abs(idest - isrc) >= 2 
+										|| Math.abs(jdest - jsrc) >= 2) {
+									
+									//Jumps are always unique (Not much room for reduction...)
+									ret.add(idest * SIDE_LENGTH + jdest + firstPartMoveNumber);
+									
+									
+								} else if( ! cloneMoveLandingsFound[idest][jdest]) {
+									
+									//Idea: after a clone move, only the destination matter,
+									// so remove clone moves where the destination is the same.
+									ret.add(idest * SIDE_LENGTH + jdest + firstPartMoveNumber);
+									cloneMoveLandingsFound[idest][jdest] = true;
+								}
+							}
+							
+						}
+					}
+				}
+			}
+		}
+		
+		return ret;
+	}
 
 	public PositionCellGame move(int move) {
 		return move(
