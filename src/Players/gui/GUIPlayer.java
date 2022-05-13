@@ -39,8 +39,6 @@ public class GUIPlayer implements PlayerI {
 		
 		
 		int moveNumber = -1;
-		//Testing:
-		//int moveNumber = sanityGetMoveConsole(pos);
 		
 		
 		Coordinate from = null;
@@ -84,7 +82,7 @@ public class GUIPlayer implements PlayerI {
 			//TODO: copy/paste code:
 			Integer moveNumObj = new Integer(moveNumber);
 			
-			//Check if moveNum is legal:
+			//Check if moveNum is legal: (Maybe make a util function?)
 			boolean chosenMoveIsLegal = false;
 			for(int i=0; i<moveList.size(); i++) {
 				if(moveNumObj.equals(moveList.get(i))) {
@@ -123,87 +121,18 @@ public class GUIPlayer implements PlayerI {
 	public void updatePosition(PositionCellGame pos) {
 		personalBoard.displayBoard(pos);
 		
+		if(pos.isGameOver()) {
+			if(pos.isPlayer1Winning()) {
+				personalBoard.displayMessage("Player 1 (Red) wins!");
+			} else {
+				personalBoard.displayMessage("Player 2 (Blue) wins!");
+			}
+		}
 	}
 	
 	//TODO: maybe update Position with move, so I can make an animation...
 	// I'll do it later!
 	
 	
-	
-	private Scanner intest = new Scanner(System.in);
-	
-	// Testing GUI by getting moves from the console.
-	// It seems to work.
-	private int sanityGetMoveConsole(PositionCellGame pos) {
-
-		int moveNumber = -1;
-		
-		boolean chosenMoveIsLegal = false;
-		
-		
-		do {
-			System.out.println("---------------");
-			ConsolePlayer.printMovesNoPos(pos);
-	
-			System.out.println(pos);
-			
-			System.out.println("Please make a move from the above choices:");
-			String line = intest.nextLine();
-			
-
-			//Try to avoid fat-fingering:
-			line = line.replace("\\", "");
-			line = line.replace("}", "");
-			line = line.replace("{", "");
-			line = line.replace("]", "");
-			line = line.replace("[", "");
-			line = line.replace("|", "");
-			line = line.replace("\'", "");
-			line = line.replace("?", "");
-			line = line.replace("\"", "");
-			line = line.replace("=", "");
-			line = line.replace("+", "");
-			
-			
-			String tokens[] = line.trim().split(" ");
-			
-			
-			if(tokens.length > 3) {
-				int i1 = Integer.parseInt(tokens[0]);
-				int j1 = Integer.parseInt(tokens[1]);
-				
-				int i2 = Integer.parseInt(tokens[2]);
-				int j2 = Integer.parseInt(tokens[3]);
-				
-				moveNumber = i1 * PositionCellGame.SIDE_LENGTH_CUBE
-						       + j1 * PositionCellGame.SIDE_LENGTH_SQUARE
-						       + i2 * PositionCellGame.SIDE_LENGTH
-						       + j2;
-				
-			
-			} else {
-				moveNumber = Integer.parseInt(tokens[0]);
-			}
-			ArrayList<Integer> moveList = pos.getMoveList(pos.isP1turn());
-			
-			Integer moveNumObj = new Integer(moveNumber);
-			
-			
-			for(int i=0; i<moveList.size(); i++) {
-				if(moveNumObj.equals(moveList.get(i))) {
-					chosenMoveIsLegal = true;
-					break;
-				}
-			}
-		
-			if( ! chosenMoveIsLegal) {
-				System.out.println("That's an illegal move! Try again!");
-			}
-			
-		} while(! chosenMoveIsLegal);
-		
-		
-		return moveNumber;
-	}
 
 }

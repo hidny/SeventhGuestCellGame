@@ -20,6 +20,9 @@ public class MainGame {
 	//      jumped from. (That's usually a good move)
 	//TODO: make the A* AI prioritize the prev depth's favorite 3?
 	
+	//TODO: maybe if there's the same position twice, it's a draw?
+	
+	//TODO: Maybe acknowlegde that cloning the same location is just 1 move...
 	
 	public static void main(String[] args) {
 //
@@ -60,26 +63,28 @@ public class MainGame {
 				
 			}
 			
-			if(curPos.getMoveList().size() == 0) {
+			
+
+			if(curPos.getMoveList().size() > 0) {
+
+				System.out.println(players[curPlayerIndex].getPlayerName() + ", please make a move:");
+				System.out.println(curPos);
 				
-				//TODO: this is ugly. Rearrange it somehow.
+				
+				int move = players[curPlayerIndex].getMove(curPos);
+				
+				curPos = curPos.move(move);
+				
+				System.out.println(players[curPlayerIndex] + " move: ");
+				
+				System.out.println(SanityTestEnv.convertMoveNumberToString(move));
+
+			} else {
+				//Player can't move:
 				System.out.println(players[curPlayerIndex].getPlayerName() + " has no moves to make.");
 				curPos = curPos.move(PositionCellGame.NO_MOVE_PASS_THE_TURN);
-				isPlayer1Turn = !isPlayer1Turn;
-				continue;
+				
 			}
-			
-			System.out.println(players[curPlayerIndex].getPlayerName() + ", please make a move:");
-			System.out.println(curPos);
-			
-			
-			int move = players[curPlayerIndex].getMove(curPos);
-			
-			curPos = curPos.move(move);
-			
-			System.out.println(players[curPlayerIndex] + " move: ");
-			
-			System.out.println(SanityTestEnv.convertMoveNumberToString(move));
 
 			sendPositionUpdate(curPos, players);
 			

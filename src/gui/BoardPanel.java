@@ -182,7 +182,7 @@ public class BoardPanel extends JPanel implements MouseListener
   boolean coordinatePressed = false; /*A flag that says when the coordinate was been pressed.*/
   
    
-   //Semaphore strat copied from AIServers -> Mellow -> ClientPlayerDecider
+   //Semaphore strategy copied from AIServers -> Mellow -> ClientPlayerDecider
    private Semaphore semaphoreToCheckWhenMoveMadeByGUI = new Semaphore(0);
    
    public Coordinate getNextCoordinateClicked() {
@@ -209,7 +209,7 @@ public class BoardPanel extends JPanel implements MouseListener
     * 
   /*Methods implementing the mouse listener:*/
   
-  /* The most important one is mouse clicked*/
+  /* I don't use mouse clicked, because it only counts if the mouse didn't move (iirc) */
 
   /**
    * Invoked when a the user clicks on the window

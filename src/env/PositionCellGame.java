@@ -1,6 +1,8 @@
 package env;
 import java.util.ArrayList;
 
+//TODO: Make sure that I didn't messed up when there's no move to make...
+
 public class PositionCellGame {
 
 	public static final int SIDE_LENGTH = 7;
@@ -201,10 +203,12 @@ public class PositionCellGame {
 	
 
 	public PositionCellGame move(int move) {
-		return move(move / SIDE_LENGTH_CUBE,
+		return move(
+			move / SIDE_LENGTH_CUBE,
 			(move / SIDE_LENGTH_SQUARE) % SIDE_LENGTH,
 			(move / SIDE_LENGTH) % SIDE_LENGTH,
-			move% SIDE_LENGTH);
+			move% SIDE_LENGTH
+		);
 		
 	}
 	
@@ -323,12 +327,34 @@ public class PositionCellGame {
 		//Game is over when no one can move:
 		if(this.getMoveList(true).size() == 0
 				&& this.getMoveList(false).size() == 0) {
+
+			return true;
+		}
+			
+		int numP1Pegs = 0;
+		int numP2Pegs = 0;
+		
+		for(int i=0; i<SIDE_LENGTH; i++) {
+			for(int j=0; j<SIDE_LENGTH; j++) {
+				if(this.board[i][j] == P1_CELL) {
+					numP1Pegs++;
+				} else if(this.board[i][j] == P2_CELL) {
+					numP2Pegs++;
+				}
+			}
+		}
+		
+		if(numP1Pegs == 0
+				|| numP2Pegs == 0
+				|| numP1Pegs + numP2Pegs == SIDE_LENGTH_SQUARE) {
 			return true;
 		} else {
 			return false;
 		}
 		
+		
 	}
+	
 	
 	public boolean isPlayer1Winning() {
 		
