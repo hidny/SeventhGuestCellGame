@@ -234,9 +234,6 @@ public class SimpleAlphaBeta implements PlayerI {
 		
 		//Edge case where player ran out of moves:
 
-		System.out.println();
-		System.out.println("Exceptional pos:");
-		System.out.println(pos);
 		
 		long target = -1;
 		int mult = 1;
@@ -245,8 +242,6 @@ public class SimpleAlphaBeta implements PlayerI {
 			target = PositionCellGame.P1_CELL;
 			
 			if(pos.getCurUtil() < 0) {
-				System.out.println("Obvious loss for player 1");
-				System.out.println();
 				//Quick return because current player obviously lost:
 				return  -2 * REASONABLY_HIGH_NUMBER;
 			}
@@ -255,8 +250,6 @@ public class SimpleAlphaBeta implements PlayerI {
 			
 
 			if(pos.getCurUtil() > 0) {
-				System.out.println("Obvious loss for player 2");
-				System.out.println();
 				//Quick return because current player obviously lost:
 				return  2 * REASONABLY_HIGH_NUMBER;
 			}
@@ -281,22 +274,30 @@ public class SimpleAlphaBeta implements PlayerI {
 		long tmp = -1;
 		if(sum > PositionCellGame.SIDE_LENGTH_SQUARE / 2) {
 
+			//TODO: maybe improve on this latter?
+			
+			System.out.println();
+			System.out.println("Exceptional pos:");
+			System.out.println(pos);
+			
 			System.out.println("I don't know. Player that cannot move is currently winning");
 			System.out.println("But I don't know if it's a forced win...");
 			tmp = pos.getCurUtil();
 			keepTrying = true;
 			
+
+			System.out.println("Util in edge case:");
+			System.out.println(tmp);
+			System.out.println();
+			
 			//Util if it was a forced win: (Do not use yet)
 			//tmp = mult * ( REASONABLY_HIGH_NUMBER + sum + depth);
 		} else {
 
-			System.out.println("Loss for the current player's turn");
+			//System.out.println("Loss for the current player's turn");
 			tmp = mult * ( - REASONABLY_HIGH_NUMBER + sum + depth);
 		}
 	
-		System.out.println("Util:");
-		System.out.println(tmp);
-		System.out.println();
 		
 		if(keepTrying) {
 			return INCONCLUSIVE;

@@ -14,7 +14,6 @@ public class SimpleAlphaBetaDepth4vs6 {
 		players[0] = new SimpleAlphaBeta(4);
 		players[1] = new SimpleAlphaBeta(6);
 		
-		//Good enough to win vs 7th guest by 9 pegs
 		MainGame.playGame(players);
 	}
 

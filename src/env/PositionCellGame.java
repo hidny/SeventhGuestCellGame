@@ -1,7 +1,6 @@
 package env;
 import java.util.ArrayList;
 
-//TODO: Make sure that I didn't messed up when there's no move to make...
 
 public class PositionCellGame {
 
@@ -202,8 +201,8 @@ public class PositionCellGame {
 	}
 	
 	//Use this function for alpha beta pruning:
-	// TODO: Make sure the results match the other getMoveList function...
-	//It was good enough to win, so I guess it's ok...
+	// I think the results match the other getMoveList function expect it's less redundant...
+	// It was good enough to win, so I guess it's ok...
 	public ArrayList<Integer> getMoveListReduced(boolean isPlayer1Turn) {
 		long curColour = -1;
 		if(isPlayer1Turn) {

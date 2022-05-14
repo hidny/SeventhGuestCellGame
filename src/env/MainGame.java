@@ -21,6 +21,7 @@ public class MainGame {
 	
 	//TODO: make the A* AI prioritize moving to the from location of where the opponent just
 	//      jumped from. (That's usually a good move)
+
 	//TODO: make the A* AI prioritize the prev depth's favorite 3? 
 	//     (Maybe do this for the first 3 moves, because the earlier it's done, the better...)
 	
@@ -29,7 +30,6 @@ public class MainGame {
 	
 	//TODO: maybe if there's the same position twice, it's a draw?
 	
-	//TODO: rewatch Sebastian video about chess AI for more ideas?
 	
 	
 	public static void main(String[] args) {
