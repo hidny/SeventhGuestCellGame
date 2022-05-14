@@ -5,17 +5,20 @@ import Players.console.ConsolePlayer;
 
 public class MainGame {
 
-	//TODO: make more main functions (Like in mellow)
+	//DONE: make more main functions (Like in mellow)
 	//That way, you don't need to change the code.
 
-	//TODO: make a console player and a random player...
-	//TODO: make a basic A* AI.
+	//DONE: make a console player and a random player...
+	//DONE: make a basic A* AI.
+	//DONE: Maybe acknowledge that cloning the same location is just 1 move...
+	
+	// ------------------------
+	//TODO: make a basic A* AI that also uses hashes
+	// And make sure the only diff is speed!
+	// Also make sure there's no hash collisions.
+
 	//TODO: make the basic A* AI do iterative deepening.
 	
-	//TODO: make a basic A* AI that also uses hashes
-			// And make sure the only diff is speed!
-			// Also make sure there's no hash collisions.
-
 	//TODO: make the A* AI prioritize moving to the from location of where the opponent just
 	//      jumped from. (That's usually a good move)
 	//TODO: make the A* AI prioritize the prev depth's favorite 3? 
@@ -26,7 +29,8 @@ public class MainGame {
 	
 	//TODO: maybe if there's the same position twice, it's a draw?
 	
-	//TODO: Maybe acknowlegde that cloning the same location is just 1 move...
+	//TODO: rewatch Sebastian video about chess AI for more ideas?
+	
 	
 	public static void main(String[] args) {
 //

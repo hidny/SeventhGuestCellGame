@@ -87,7 +87,8 @@ public class SimpleAlphaBeta implements PlayerI {
 	}
 	
 	public static final int REALLY_HIGH_NUMBER = 100000;
-	public static final String SPACE = "      ";
+	public static final String SPACE = "         ";
+	public static final int REASONABLY_HIGH_NUMBER = 100000;
 	
 	public static long[] getUtilityOfAllMoves(PositionCellGame pos, int depth) {
 		ArrayList<Integer> choices = pos.getMoveListReduced(pos.isP1turn());
@@ -122,7 +123,6 @@ public class SimpleAlphaBeta implements PlayerI {
 				
 			} else {
 				if(maximizingPlayer) {
-					//TODO: did I get it the right way around?
 					ret[i] = getMoveUtil(pos.move(choices.get(i)), depth-1, curBest, REALLY_HIGH_NUMBER);
 				} else {
 					ret[i] = getMoveUtil(pos.move(choices.get(i)), depth-1, -REALLY_HIGH_NUMBER, curBest);
@@ -170,12 +170,23 @@ public class SimpleAlphaBeta implements PlayerI {
 				&& pos.isGameOver()) {
 
 			return pos.getCurUtil();
+
 		} else if(choices.size() == 0) {
 			
-			System.out.println("TODO: FIX ME UP!");
-			//TODO: this should be just a function that checks who's winning
-			// because only 1 player can't move!
-			return pos.getCurUtil();
+			long edgeCaseUtil = handleNoMoveEdgeCase(pos, depth);
+			
+			if(edgeCaseUtil == INCONCLUSIVE ) {
+				
+				// Can't figure out who's winning, so keep looking:
+				System.out.println("Keep looking.");
+				choices.add(new Integer(PositionCellGame.NO_MOVE_PASS_THE_TURN));
+				
+			} else {
+				//The edge case function figured out who's winning, so just
+				// return the relevant util.
+				return edgeCaseUtil;
+			}
+			
 		}
 		
 		
@@ -214,6 +225,85 @@ public class SimpleAlphaBeta implements PlayerI {
 		
 		
 		return ret;
+	}
+	
+
+	public static final long INCONCLUSIVE = -1234567; 
+	
+	public static long handleNoMoveEdgeCase(PositionCellGame pos, int depth) {
+		
+		//Edge case where player ran out of moves:
+
+		System.out.println();
+		System.out.println("Exceptional pos:");
+		System.out.println(pos);
+		
+		long target = -1;
+		int mult = 1;
+		
+		if(pos.isP1turn()) {
+			target = PositionCellGame.P1_CELL;
+			
+			if(pos.getCurUtil() < 0) {
+				System.out.println("Obvious loss for player 1");
+				System.out.println();
+				//Quick return because current player obviously lost:
+				return  -2 * REASONABLY_HIGH_NUMBER;
+			}
+		} else {
+			target = PositionCellGame.P2_CELL;
+			
+
+			if(pos.getCurUtil() > 0) {
+				System.out.println("Obvious loss for player 2");
+				System.out.println();
+				//Quick return because current player obviously lost:
+				return  2 * REASONABLY_HIGH_NUMBER;
+			}
+			
+			mult = -1;
+		}
+		
+		long board[][] = pos.getBoard();
+		
+		int sum = 0;
+		
+		for(int i=0; i<board.length; i++) {
+			for(int j=0; j<board[0].length; j++) {
+				if(board[i][j] == target) {
+					sum++;
+				}
+			}
+		}
+		
+		boolean keepTrying = false;
+		
+		long tmp = -1;
+		if(sum > PositionCellGame.SIDE_LENGTH_SQUARE / 2) {
+
+			System.out.println("I don't know. Player that cannot move is currently winning");
+			System.out.println("But I don't know if it's a forced win...");
+			tmp = pos.getCurUtil();
+			keepTrying = true;
+			
+			//Util if it was a forced win: (Do not use yet)
+			//tmp = mult * ( REASONABLY_HIGH_NUMBER + sum + depth);
+		} else {
+
+			System.out.println("Loss for the current player's turn");
+			tmp = mult * ( - REASONABLY_HIGH_NUMBER + sum + depth);
+		}
+	
+		System.out.println("Util:");
+		System.out.println(tmp);
+		System.out.println();
+		
+		if(keepTrying) {
+			return INCONCLUSIVE;
+		} else {
+			return tmp;
+		}
+		
 	}
 	
 }
