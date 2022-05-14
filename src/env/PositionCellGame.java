@@ -201,6 +201,8 @@ public class PositionCellGame {
 		
 	}
 	
+	//TODO: use this function for alpha beta pruning:
+	// TODO: Make sure the results match the other getMoveList function...
 	public ArrayList<Integer> getMoveListReduced(boolean isPlayer1Turn) {
 		long curColour = -1;
 		if(isPlayer1Turn) {
