@@ -12,12 +12,14 @@ public class MainGame {
 	//DONE: make a basic A* AI.
 	//DONE: Maybe acknowledge that cloning the same location is just 1 move...
 	
+	//DONE: make a basic A* AI that also uses hashes
+	//DONE: make the basic A* AI do iterative deepening.
+	
 	// ------------------------
-	//TODO: make a basic A* AI that also uses hashes
-	// And make sure the only diff is speed!
-	// Also make sure there's no hash collisions.
+	
+	// TODO: And make sure the only diff is speed! (When hashes added)
+	// TODO: Also make sure there's no hash collisions. (use backup)
 
-	//TODO: make the basic A* AI do iterative deepening.
 	
 	//TODO: make the A* AI prioritize moving to the from location of where the opponent just
 	//      jumped from. (That's usually a good move)
