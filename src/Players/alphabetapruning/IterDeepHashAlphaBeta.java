@@ -30,12 +30,13 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 		
 		refutationTable = new HashMap<Long, HashObjectWithNextBestMove>();
 		
+		int prevBestIndex = -1;
 		for(int i=1; i< this.depth; i++) {
 			System.out.println("Depth = " + i);
-			getBestMove(pos, i, this.getPlayerName());
+			prevBestIndex = getBestMoveIndex(pos, i, this.getPlayerName(), prevBestIndex);
 		}
 		
-		int tmp = getBestMove(pos, this.depth, this.getPlayerName());
+		int tmpIndex = getBestMoveIndex(pos, this.depth, this.getPlayerName(), prevBestIndex);
 		
 		System.out.println("Debug:");
 		System.out.println("Number of matches: " + debugNumMatches);
@@ -45,7 +46,7 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 		debugNumElements = 0;
 		
 		
-		return tmp;
+		return pos.getMoveListReduced(pos.isP1turn()).get(tmpIndex);
 	}
 
 	@Override
@@ -60,11 +61,11 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 	}
 	
 
-	public static int getBestMove(PositionCellGame pos, int depth, String name) {
+	public static int getBestMoveIndex(PositionCellGame pos, int depth, String name, int prevBestMoveIndex) {
 		
 		System.out.println("Trying to get the best move for " + name);
 		
-		long choices[] = getUtilityOfAllMoves(pos, depth);
+		long choices[] = getUtilityOfAllMoves(pos, depth, prevBestMoveIndex);
 		
 		if(choices.length == 0) {
 			return PositionCellGame.NO_MOVE_PASS_THE_TURN;
@@ -84,7 +85,7 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 		
 		
 		
-		return pos.getMoveListReduced(pos.isP1turn()).get(bestIndex);
+		return bestIndex;
 	}
 	
 	
@@ -116,7 +117,7 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 	public static final String SPACE = "         ";
 	public static final int REASONABLY_HIGH_NUMBER = 100000;
 	
-	public static long[] getUtilityOfAllMoves(PositionCellGame pos, int depth) {
+	public static long[] getUtilityOfAllMoves(PositionCellGame pos, int depth, int prevBestMoveIndex) {
 		ArrayList<Integer> choices = pos.getMoveListReduced(pos.isP1turn());
 		
 		
@@ -133,9 +134,23 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 		
 		long ret[] = new long[choices.size()];
 		
-		long curBest = -1;
-		
+		long curBest = -666;
+
 		boolean isFirstTrial = true;
+		
+		//Try prev best move: (TODO: later: try prev best 3 moves?)
+		if(prevBestMoveIndex >= 0) {
+			System.out.println("Trying prev best move: " + SanityTestEnv.convertMoveNumberToString(choices.get(prevBestMoveIndex)));
+			ret[prevBestMoveIndex] = getMoveUtil(pos.move(choices.get(prevBestMoveIndex)), depth-1, -REALLY_HIGH_NUMBER, REALLY_HIGH_NUMBER);
+			
+			curBest = ret[prevBestMoveIndex];
+			
+			isFirstTrial = false;
+			
+			System.out.println("Got " +  SPACE.substring((ret[prevBestMoveIndex] + "").length()) + ret[prevBestMoveIndex]);
+			System.out.println();
+		}
+		
 		
 		for(int i=0; i<choices.size(); i++) {
 			
@@ -178,6 +193,10 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 			
 		}
 		
+
+		//TODO: avoid infinite loop: (I had the AI do infinite jumps...)
+		// Maybe create a fractional util?
+		
 		return ret;
 		
 	}
@@ -195,35 +214,46 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 		
 		if(refutationTable.containsKey(pos.getCurHash())) {
 			
-			HashObjectWithNextBestMove prevPos = refutationTable.get(pos.getCurHash());
+			if(pos.getCurBackupHash() == refutationTable.get(pos.getCurHash()).getBackupHash()) {
 			
-			if(prevPos.getDepthUsed() >= depth) {
+				HashObjectWithNextBestMove prevPos = refutationTable.get(pos.getCurHash());
 				
-				debugNumMatches++;
-				
-				if(debugNumMatches % DEBUG_MULT == 0) {
-					System.out.println("debugNumMatches: " + debugNumMatches);
-				}
-				
-				if( ! prevPos.isWasPrunedBeforeFullyCalc()) {
-					return prevPos.getUtilValue();
-				} else {
-					if(pos.isP1turn()) {
-						alpha = Math.max(prevPos.getUtilValue(), alpha);
-					} else {
-						beta = Math.min(prevPos.getUtilValue(), beta);
+				if(prevPos.getDepthUsed() >= depth) {
+					
+					debugNumMatches++;
+					
+					if(debugNumMatches % DEBUG_MULT == 0) {
+						System.out.println("debugNumMatches: " + debugNumMatches);
 					}
+					
+					if( ! prevPos.isWasPrunedBeforeFullyCalc()) {
+						return prevPos.getUtilValue();
+					} else {
+						if(pos.isP1turn()) {
+							alpha = Math.max(prevPos.getUtilValue(), alpha);
+						} else {
+							beta = Math.min(prevPos.getUtilValue(), beta);
+						}
+						
+						prevBestMoveIndex = refutationTable.get(pos.getCurHash()).getPrevBestMove();
+					}
+					
+					if(alpha >= beta) {
+						return prevPos.getUtilValue();
+					}
+					
+				} else {
+					// Found a match, but it's from the prev iteration:
+					debugNumMatches++;
+
+					if(debugNumMatches % DEBUG_MULT == 0) {
+						System.out.println("debugNumMatches: " + debugNumMatches);
+					}
+					prevBestMoveIndex = refutationTable.get(pos.getCurHash()).getPrevBestMove();
 				}
-				
-				if(alpha >= beta) {
-					return prevPos.getUtilValue();
-				}
-				
 			} else {
-				// Found a match, but it's from the prev iteration:
-				debugNumMatches++;
+				System.err.println("WARNING: COLLISION!");
 				
-				prevBestMoveIndex = refutationTable.get(pos.getCurHash()).getPrevBestMove();
 			}
 			
 		}
@@ -324,10 +354,10 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 		boolean wasPrunedBeforeFullyCalc = (beta <= alpha);
 		
 		
-		HashObjectWithNextBestMove nextBestMoveHash = new HashObjectWithNextBestMove(ret, wasPrunedBeforeFullyCalc, depth, nextBestMoveIndex);
+		HashObjectWithNextBestMove nextBestMoveHash = new HashObjectWithNextBestMove(ret, wasPrunedBeforeFullyCalc, depth, nextBestMoveIndex, pos.getCurBackupHash());
 		
 		//TODO: add the hashDepth as a var
-		if(depth > 2) {
+		//if(depth > 2) {
 			// TODO: make this non-static.
 			if(refutationTable.containsKey(pos.getCurHash())) {
 				refutationTable.remove(pos.getCurHash());
@@ -339,7 +369,7 @@ public class IterDeepHashAlphaBeta implements PlayerI {
 			if(debugNumElements % DEBUG_MULT == 0) {
 				System.out.println("debugNumElements: " + debugNumElements);
 			}
-		}
+		//}
 		
 		return ret;
 	}

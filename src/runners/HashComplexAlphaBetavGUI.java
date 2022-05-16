@@ -14,7 +14,7 @@ public class HashComplexAlphaBetavGUI {
 		PlayerI players[] = new PlayerI[2];
 
 		players[0] = new GUIPlayer("Michael");
-		players[1] = new IterDeepHashAlphaBeta(8);
+		players[1] = new IterDeepHashAlphaBeta(6);
 		
 		MainGame.playGame(players);
 	}

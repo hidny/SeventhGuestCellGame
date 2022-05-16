@@ -93,6 +93,9 @@ public class PositionCellGame {
 		return ret;
 	}
 
+	private static long turnMult = -1;
+	private static long backupTurnMult = -1;
+	
 	public static void setupHashMultiples() {
 		
 		long cur = 1;
@@ -110,6 +113,10 @@ public class PositionCellGame {
 				curBack = (multBack * curBack) % HASH_LIMIT;
 			}
 		}
+		
+		turnMult = (mult * cur) % HASH_LIMIT;
+		backupTurnMult = (mult * cur) % HASH_LIMIT;
+		
 	}
 
 	
@@ -327,11 +334,11 @@ public class PositionCellGame {
 		
 		p1turn = !p1turn;
 		if(p1turn) {
-			this.curHash -= SIDE_LENGTH_FORTH;
-			this.curBackupHash -= SIDE_LENGTH_FORTH;
+			this.curHash -= turnMult;
+			this.curBackupHash -= backupTurnMult;
 		} else {
-			this.curHash += SIDE_LENGTH_FORTH;
-			this.curBackupHash += SIDE_LENGTH_FORTH;
+			this.curHash += turnMult;
+			this.curBackupHash += backupTurnMult;
 		}
 		
 		readjustHashes();
