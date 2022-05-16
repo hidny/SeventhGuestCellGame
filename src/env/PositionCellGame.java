@@ -51,6 +51,22 @@ public class PositionCellGame {
 		}
 	}
 	
+	
+	public PositionCellGame(PositionCellGame origPos) {
+		
+		for(int i=0; i<SIDE_LENGTH; i++) {
+			for(int j=0; j<SIDE_LENGTH; j++) {
+				this.board[i][j] = origPos.board[i][j];
+			}
+		}
+		
+		this.curHash = origPos.curHash;
+		this.curBackupHash = origPos.curHash;
+		this.p1turn = origPos.p1turn;
+		this.curUtil = origPos.curUtil;
+		
+	}
+	
 	public String toString() {
 		String ret = "Position:\n";
 		
