@@ -1,32 +1,52 @@
 package Players.alphabetaComplexEval;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import Players.PlayerI;
+import alphaBetaHash.SimpleHashObject;
+import alphaBetaHash.SimpleHashObjectWithDoubleUtil;
 import env.PositionCellGame;
 import env.SanityTestEnv;
 
-//TODO: make another one that hashes prev positions!
-// I think it will make a big diff...
+public class ComplexEvalHashAlphaBeta implements PlayerI {
 
-public class ComplexEvalAlphaBeta implements PlayerI {
 	
+	public static HashMap<Long, SimpleHashObjectWithDoubleUtil> refutationTable = new HashMap<Long, SimpleHashObjectWithDoubleUtil>();
+
+	public static int DEBUG_MULT = 10000;
 	public int depth;
 	
-	public ComplexEvalAlphaBeta(int depth) {
+	public ComplexEvalHashAlphaBeta(int depth) {
 		this.depth = depth;
 	}
 
+	public static int debugNumMatches = 0;
+	public static int debugNumElements = 0;
+	
 	@Override
 	public int getMove(PositionCellGame pos) {
 		
+		refutationTable = new HashMap<Long, SimpleHashObjectWithDoubleUtil>();
+		
 		PositionWithComplexEval pos2 = new PositionWithComplexEval(pos);
-		return getBestMove(pos2, this.depth, this.getPlayerName()) ;
+		
+		int tmp = getBestMove(pos2, this.depth, this.getPlayerName());
+		
+		System.out.println("Debug:");
+		System.out.println("Number of matches: " + debugNumMatches);
+		System.out.println("Number of elements added to hash: " + debugNumElements);
+		
+		debugNumMatches = 0;
+		debugNumElements = 0;
+		
+		
+		return tmp;
 	}
 
 	@Override
 	public String getPlayerName() {
-		return "Simple Alpha Beta with depth " + this.depth;
+		return "Complex eval and Simple Hash Alpha Beta with depth " + this.depth;
 	}
 
 	@Override
@@ -165,6 +185,36 @@ public class ComplexEvalAlphaBeta implements PlayerI {
 			return pos2.getComplexUtil();
 		}
 		
+		//Check if we already did the calculation somehow:
+		if(refutationTable.containsKey(pos2.getCurHash())) {
+			
+			SimpleHashObjectWithDoubleUtil simpleObject = refutationTable.get(pos2.getCurHash());
+			
+			if(simpleObject.getDepthUsed() >= depth) {
+				
+				debugNumMatches++;
+				
+				if(debugNumMatches % DEBUG_MULT == 0) {
+					System.out.println("debugNumMatches: " + debugNumMatches);
+				}
+				
+				if( ! simpleObject.isWasPrunedBeforeFullyCalc()) {
+					return simpleObject.getUtilValue();
+				} else {
+					if(pos2.isP1turn()) {
+						alpha = Math.max(simpleObject.getUtilValue(), alpha);
+					} else {
+						beta = Math.min(simpleObject.getUtilValue(), beta);
+					}
+				}
+				
+				if(alpha >= beta) {
+					return simpleObject.getUtilValue();
+				}
+				
+			}
+		}
+		
 		ArrayList<Integer> choices = pos2.getMoveListReduced(pos2.isP1turn());
 		
 		if(choices.size() == 0
@@ -224,7 +274,25 @@ public class ComplexEvalAlphaBeta implements PlayerI {
 			ret = beta;
 		}
 		
+
+		// TODO: make this non-static.
+		//Add to the refutationTable:
+		boolean wasPrunedBeforeFullyCalc = (beta <= alpha);
 		
+		
+		SimpleHashObjectWithDoubleUtil simpleObject = new SimpleHashObjectWithDoubleUtil(ret, wasPrunedBeforeFullyCalc, depth);
+		
+		if(refutationTable.containsKey(pos2.getCurHash())) {
+			refutationTable.remove(pos2.getCurHash());
+			debugNumElements--;
+		}
+		refutationTable.put(pos2.getCurHash(), simpleObject);
+		debugNumElements++;
+		
+		if(debugNumElements % DEBUG_MULT == 0) {
+			System.out.println("debugNumElements: " + debugNumElements);
+		}
+	
 		return ret;
 	}
 	
