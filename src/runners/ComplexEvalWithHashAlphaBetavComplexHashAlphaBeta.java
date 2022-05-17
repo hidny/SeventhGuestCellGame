@@ -16,8 +16,8 @@ public class ComplexEvalWithHashAlphaBetavComplexHashAlphaBeta {
 	public static void main(String[] args) {
 		PlayerI players[] = new PlayerI[2];
 
-		players[0] = new ComplexEvalIterDeepHashAlphaBetaBAD(8);
-		players[1] = new ComplexEvalAlphaBeta(4);
+		players[0] = new ComplexEvalIterDeepHashAlphaBetaBAD(4);
+		players[1] = new ComplexEvalAlphaBeta(6);
 		
 		MainGame.playGame(players);
 	}

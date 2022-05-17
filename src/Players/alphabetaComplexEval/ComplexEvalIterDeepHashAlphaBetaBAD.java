@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Players.PlayerI;
+import Players.random.RandomCloner;
 import alphaBetaHash.HashObjectWithNextBestMoveAndDoubleUtil;
 import env.PositionCellGame;
 import env.SanityTestEnv;
@@ -47,9 +48,15 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 		debugNumMatches = 0;
 		debugNumElements = 0;
 		
+		//Anti-infinite loop measure:
+		if(shouldCloneBecauseItsGameOver(pos2, tmpIndex)) {
+			return getFirstCloneMoveIndex(pos2);
+			
+		}
 		
 		return pos2.getMoveListReduced(pos2.isP1turn()).get(tmpIndex);
 	}
+	
 
 	@Override
 	public String getPlayerName() {
@@ -130,7 +137,7 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 	
 	public static final double REALLY_HIGH_NUMBER = 100000.0;
 	public static final String SPACE = "         ";
-	public static final double REASONABLY_HIGH_NUMBER = 100000.0;
+	public static final double REASONABLY_HIGH_NUMBER = 10000.0;
 	
 	public static double[] getUtilityOfAllMoves(PositionWithComplexEval pos2, int depth, int prevBestMoveIndex) {
 			
@@ -388,24 +395,25 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 
 	public static final double INCONCLUSIVE = -1234567.0;
 	public static final double SMALL_DECIMAL = 0.0001;
+	public static final double MARGIN = 1000.0;
 	
 	public static double handleNoMoveEdgeCase(PositionWithComplexEval pos2, int depth) {
 		
 		//Edge case where player ran out of moves:
 
 		
-		long target = -1;
+		long opponentColour = -1;
 		double mult = 1.0;
 		
 		if(pos2.isP1turn()) {
-			target = PositionCellGame.P1_CELL;
+			opponentColour = PositionCellGame.P2_CELL;
 			
 			if(pos2.getCurUtil() < 0) {
 				//Quick return because current player obviously lost:
 				return  -2 * REASONABLY_HIGH_NUMBER;
 			}
 		} else {
-			target = PositionCellGame.P2_CELL;
+			opponentColour = PositionCellGame.P1_CELL;
 			
 
 			if(pos2.getCurUtil() > 0) {
@@ -418,12 +426,12 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 		
 		long board[][] = pos2.getBoard();
 		
-		int sum = 0;
+		int sumOpponentPegs = 0;
 		
 		for(int i=0; i<board.length; i++) {
 			for(int j=0; j<board[0].length; j++) {
-				if(board[i][j] == target) {
-					sum++;
+				if(board[i][j] == opponentColour) {
+					sumOpponentPegs++;
 				}
 			}
 		}
@@ -431,7 +439,7 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 		boolean keepTrying = false;
 		
 		double tmp = -1.0;
-		if(sum > PositionCellGame.SIDE_LENGTH_SQUARE / 2) {
+		if(sumOpponentPegs > PositionCellGame.SIDE_LENGTH_SQUARE / 2) {
 
 			//TODO: maybe improve on this latter?
 			
@@ -457,15 +465,10 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 			//tmp = mult * ( REASONABLY_HIGH_NUMBER + sum + depth);
 		} else {
 
-			//System.out.println("Loss for the current player's turn");
-			tmp = mult * ( - REASONABLY_HIGH_NUMBER + sum + depth);
+			//System.out.println("Win for the current player's turn");
+			tmp = mult * ( REASONABLY_HIGH_NUMBER + sumOpponentPegs + depth);
 		}
 	
-		
-		//Try to avoid infinite loops by encoraging the AI to fill in the blank:
-		//TODO: if this works: copy it to the other AIs.
-		tmp +=SMALL_DECIMAL * (pos2.getCurUtil() * depth);
-		
 		
 		if(keepTrying) {
 			return INCONCLUSIVE;
@@ -474,5 +477,29 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 		}
 		
 	}
+
+	public static boolean shouldCloneBecauseItsGameOver(PositionWithComplexEval pos2, int curBestIndex) {
+		return pos2.getMoveListReduced(! pos2.isP1turn()).size() == 0
+				&& PositionCellGame.isJump(pos2.getMoveListReduced(pos2.isP1turn()).get(curBestIndex))
+				&& ((pos2.isP1turn() && handleNoMoveEdgeCase(pos2, 0) > REALLY_HIGH_NUMBER - MARGIN)
+						||
+					(!pos2.isP1turn() && handleNoMoveEdgeCase(pos2, 0) < REALLY_HIGH_NUMBER + MARGIN)
+					);
+	}
 	
+	public static int getFirstCloneMoveIndex(PositionCellGame pos) {
+		ArrayList<Integer> moves = pos.getMoveListReduced(pos.isP1turn());
+		
+		System.out.println("Just clone because it's game over:");
+		
+		//Just clone because it's game over
+		for(int i=0; i<moves.size(); i++) {
+
+			if( ! PositionCellGame.isJump(moves.get(i))) {
+				return moves.get(i);
+			}
+		}
+		System.out.println("AHH! No clone moves! This shouldn't be possible!");
+		return -1;
+	}
 }

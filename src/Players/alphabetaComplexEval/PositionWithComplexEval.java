@@ -1,6 +1,5 @@
 package Players.alphabetaComplexEval;
 
-import Players.random.RandomCloner;
 import env.PositionCellGame;
 
 public class PositionWithComplexEval extends PositionCellGame {
@@ -77,7 +76,7 @@ public class PositionWithComplexEval extends PositionCellGame {
 							} else if(board[idest][jdest] == curColour) {
 								hasFarNeighbour = true;
 								
-								if(! RandomCloner.isJump(isrc, jsrc, idest, jdest)) {
+								if(! PositionCellGame.isJump(isrc, jsrc, idest, jdest)) {
 									hasCloseNeighbour = true;
 								}
 								

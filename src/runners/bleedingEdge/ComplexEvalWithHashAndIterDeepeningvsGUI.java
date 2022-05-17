@@ -17,7 +17,7 @@ public class ComplexEvalWithHashAndIterDeepeningvsGUI {
 		PlayerI players[] = new PlayerI[2];
 
 		players[0] = new GUIPlayer("Michael");
-		players[1] = new ComplexEvalIterDeepHashAlphaBetaBAD(6);
+		players[1] = new ComplexEvalIterDeepHashAlphaBetaBAD(4);
 		
 		MainGame.playGame(players);
 	}

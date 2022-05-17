@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import Players.PlayerI;
 import env.PositionCellGame;
 
-public class RandomCloner implements PlayerI {
+public class RandomCloner2 implements PlayerI {
 
 	private String playerName = "";
 	
-	public RandomCloner(String playerName) {
+	public RandomCloner2(String playerName) {
 		this.playerName = playerName;
 	}
 	
@@ -22,13 +22,8 @@ public class RandomCloner implements PlayerI {
 		
 		for(int i=0; i<moves.size(); i++) {
 			int moveNum = moves.get(i);
-
-			int i1 = moveNum / PositionCellGame.SIDE_LENGTH_CUBE;
-			int j1 = (moveNum / PositionCellGame.SIDE_LENGTH_SQUARE) % PositionCellGame.SIDE_LENGTH;
-			int i2 = (moveNum / PositionCellGame.SIDE_LENGTH) % PositionCellGame.SIDE_LENGTH;
-			int j2 = moveNum% PositionCellGame.SIDE_LENGTH;
 			
-			if( ! PositionCellGame.isJump(i1, j1, i2, j2)) {
+			if( ! PositionCellGame.isJump(moves.get(i))) {
 				cloningMoves.add(moveNum);
 			}
 		}
@@ -55,6 +50,5 @@ public class RandomCloner implements PlayerI {
 	public void updatePosition(PositionCellGame pos) {
 		
 	}
-	
 
 }

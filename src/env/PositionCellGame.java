@@ -450,4 +450,17 @@ public class PositionCellGame {
 	public boolean isP1turn() {
 		return p1turn;
 	}
+	
+
+	public static boolean isJump(int move) {
+		return isJump(move / PositionCellGame.SIDE_LENGTH_CUBE,
+				(move / PositionCellGame.SIDE_LENGTH_SQUARE) % PositionCellGame.SIDE_LENGTH,
+				(move / PositionCellGame.SIDE_LENGTH) % PositionCellGame.SIDE_LENGTH,
+				move% PositionCellGame.SIDE_LENGTH);
+	}
+	
+	
+	public static boolean isJump(int i1, int j1, int i2, int j2) {
+		return Math.abs(i1 - i2) >= 2 || Math.abs(j1 - j2) >= 2;
+	}
 }
