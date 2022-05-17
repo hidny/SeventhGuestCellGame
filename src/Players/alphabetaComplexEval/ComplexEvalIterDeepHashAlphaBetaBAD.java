@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Players.PlayerI;
-import alphaBetaHash.SimpleHashObjectWithDoubleUtil;
+import alphaBetaHash.HashObjectWithNextBestMoveAndDoubleUtil;
 import env.PositionCellGame;
 import env.SanityTestEnv;
 
-public class ComplexEvalHashAlphaBeta implements PlayerI {
+public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 
 	
-	public static HashMap<Long, SimpleHashObjectWithDoubleUtil> refutationTable = new HashMap<Long, SimpleHashObjectWithDoubleUtil>();
+	public static HashMap<Long, HashObjectWithNextBestMoveAndDoubleUtil> refutationTable = new HashMap<Long, HashObjectWithNextBestMoveAndDoubleUtil>();
 
 	public static int DEBUG_MULT = 10000;
 	public int depth;
 	
-	public ComplexEvalHashAlphaBeta(int depth) {
+	public ComplexEvalIterDeepHashAlphaBetaBAD(int depth) {
 		this.depth = depth;
 	}
 
@@ -26,11 +26,17 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 	@Override
 	public int getMove(PositionCellGame pos) {
 		
-		refutationTable = new HashMap<Long, SimpleHashObjectWithDoubleUtil>();
+		refutationTable = new HashMap<Long, HashObjectWithNextBestMoveAndDoubleUtil>();
 		
 		PositionWithComplexEval pos2 = new PositionWithComplexEval(pos);
 		
-		int tmp = getBestMove(pos2, this.depth, this.getPlayerName());
+		int prevBestIndex = -1;
+		for(int i=1; i< this.depth; i++) {
+			System.out.println("Depth = " + i);
+			prevBestIndex = getBestMoveIndex(pos2, i, this.getPlayerName(), prevBestIndex);
+		}
+		
+		int tmpIndex = getBestMoveIndex(pos2, this.depth, this.getPlayerName(), prevBestIndex);
 		
 		System.out.println("Debug:");
 		System.out.println("Number of matches: " + debugNumMatches);
@@ -40,12 +46,12 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 		debugNumElements = 0;
 		
 		
-		return tmp;
+		return pos.getMoveListReduced(pos2.isP1turn()).get(tmpIndex);
 	}
 
 	@Override
 	public String getPlayerName() {
-		return "Complex eval and Simple Hash Alpha Beta with depth " + this.depth;
+		return "Complex eval with Hashes and Iter Deepening Alpha Beta with depth " + this.depth;
 	}
 
 	@Override
@@ -55,11 +61,11 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 	}
 	
 
-	public static int getBestMove(PositionWithComplexEval pos2, int depth, String name) {
-		
+	public static int getBestMoveIndex(PositionWithComplexEval pos2, int depth, String name, int prevBestMoveIndex) {
+				
 		System.out.println("Trying to get the best move for " + name);
 		
-		double choices[] = getUtilityOfAllMoves(pos2, depth);
+		double choices[] = getUtilityOfAllMoves(pos2, depth, prevBestMoveIndex);
 		
 		if(choices.length == 0) {
 			return PositionCellGame.NO_MOVE_PASS_THE_TURN;
@@ -79,7 +85,7 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 		
 		
 		
-		return pos2.getMoveListReduced(pos2.isP1turn()).get(bestIndex);
+		return bestIndex;
 	}
 	
 	
@@ -111,14 +117,17 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 	public static final String SPACE = "         ";
 	public static final double REASONABLY_HIGH_NUMBER = 100000.0;
 	
-	public static double[] getUtilityOfAllMoves(PositionWithComplexEval pos2, int depth) {
+	public static double[] getUtilityOfAllMoves(PositionWithComplexEval pos2, int depth, int prevBestMoveIndex) {
+			
 		ArrayList<Integer> choices = pos2.getMoveListReduced(pos2.isP1turn());
+		
 		
 		boolean maximizingPlayer = true;
 		if(! pos2.isP1turn()) {
 			maximizingPlayer = false;
 		}
 		
+		//make sure depth doesn't go beyond the game:
 		if(choices.size() == 0) {
 				//Pass:
 				return new double[0];
@@ -126,9 +135,23 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 		
 		double ret[] = new double[choices.size()];
 		
-		double curBest = -1;
-		
+		double curBest = -666.0;
+
 		boolean isFirstTrial = true;
+		
+		//Try prev best move: (TODO: later: try prev best 3 moves?)
+		if(prevBestMoveIndex >= 0) {
+			System.out.println("Trying prev best move: " + SanityTestEnv.convertMoveNumberToString(choices.get(prevBestMoveIndex)));
+			ret[prevBestMoveIndex] = getMoveUtil((PositionWithComplexEval)pos2.move(choices.get(prevBestMoveIndex)), depth-1, -REALLY_HIGH_NUMBER, REALLY_HIGH_NUMBER);
+			
+			curBest = ret[prevBestMoveIndex];
+			
+			isFirstTrial = false;
+			
+			System.out.println("Got " +  SPACE.substring((ret[prevBestMoveIndex] + "").length()) + ret[prevBestMoveIndex]);
+			System.out.println();
+		}
+		
 		
 		for(int i=0; i<choices.size(); i++) {
 			
@@ -170,7 +193,11 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 			System.out.println();
 			
 		}
+		
 
+		//TODO: avoid infinite loop: (I had the AI do infinite jumps...)
+		// Maybe create a fractional util?
+		
 		return ret;
 		
 	}
@@ -184,37 +211,56 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 			return pos2.getComplexUtil();
 		}
 		
-		//Check if we already did the calculation somehow:
+		int prevBestMoveIndex = -1;
+		
 		if(refutationTable.containsKey(pos2.getCurHash())) {
 			
-			SimpleHashObjectWithDoubleUtil simpleObject = refutationTable.get(pos2.getCurHash());
+			if(pos2.getCurBackupHash() == refutationTable.get(pos2.getCurHash()).getBackupHash()) {
 			
-			if(simpleObject.getDepthUsed() >= depth) {
+				HashObjectWithNextBestMoveAndDoubleUtil prevPos = refutationTable.get(pos2.getCurHash());
 				
-				debugNumMatches++;
-				
-				if(debugNumMatches % DEBUG_MULT == 0) {
-					System.out.println("debugNumMatches: " + debugNumMatches);
-				}
-				
-				if( ! simpleObject.isWasPrunedBeforeFullyCalc()) {
-					return simpleObject.getUtilValue();
-				} else {
-					if(pos2.isP1turn()) {
-						alpha = Math.max(simpleObject.getUtilValue(), alpha);
-					} else {
-						beta = Math.min(simpleObject.getUtilValue(), beta);
+				if(prevPos.getDepthUsed() >= depth) {
+					
+					debugNumMatches++;
+					
+					if(debugNumMatches % DEBUG_MULT == 0) {
+						System.out.println("debugNumMatches: " + debugNumMatches);
 					}
+					
+					if( ! prevPos.isWasPrunedBeforeFullyCalc()) {
+						return prevPos.getUtilValue();
+					} else {
+						if(pos2.isP1turn()) {
+							alpha = Math.max(prevPos.getUtilValue(), alpha);
+						} else {
+							beta = Math.min(prevPos.getUtilValue(), beta);
+						}
+						
+						prevBestMoveIndex = refutationTable.get(pos2.getCurHash()).getPrevBestMove();
+					}
+					
+					if(alpha >= beta) {
+						return prevPos.getUtilValue();
+					}
+					
+				} else {
+					// Found a match, but it's from the prev iteration:
+					debugNumMatches++;
+
+					if(debugNumMatches % DEBUG_MULT == 0) {
+						System.out.println("debugNumMatches: " + debugNumMatches);
+					}
+					prevBestMoveIndex = refutationTable.get(pos2.getCurHash()).getPrevBestMove();
 				}
-				
-				if(alpha >= beta) {
-					return simpleObject.getUtilValue();
-				}
+			} else {
+				System.err.println("WARNING: COLLISION!");
 				
 			}
+			
 		}
 		
 		ArrayList<Integer> choices = pos2.getMoveListReduced(pos2.isP1turn());
+		
 		
 		if(choices.size() == 0
 				&& pos2.isGameOver()) {
@@ -242,16 +288,32 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 		
 		double ret;
 		
+
+		//prevBestMoveIndex
+		int nextBestMoveIndex = -1;
+		
 		if(pos2.isP1turn()) {
 			
-			//get max util for next turn:
-			for(int i=0; i<choices.size(); i++) {
+			if( prevBestMoveIndex >= 0) {
+				double tmp = getMoveUtil((PositionWithComplexEval)pos2.move(choices.get(prevBestMoveIndex)), depth-1, alpha, beta);
 				
-				alpha = Math.max(getMoveUtil((PositionWithComplexEval)pos2.move(choices.get(i)), depth-1, alpha, beta), alpha);
-				
-				if(alpha >= beta) {
-					break;
+				if(tmp > alpha) {
+					nextBestMoveIndex = prevBestMoveIndex;
 				}
+				alpha = Math.max(tmp, alpha);
+				
+			}
+			
+			//get max util for next turn:
+			for(int i=0; i<choices.size() && alpha < beta; i++) {
+				
+				double tmp = getMoveUtil((PositionWithComplexEval)pos2.move(choices.get(i)), depth-1, alpha, beta);
+					
+				
+				if(tmp > alpha) {
+					nextBestMoveIndex = i;
+				}
+				alpha = Math.max(tmp, alpha);
 				
 				
 			}
@@ -260,32 +322,45 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 			
 		} else {
 			
-			//get min util for next turn:
-			for(int i=0; i<choices.size(); i++) {
-				beta = Math.min(getMoveUtil((PositionWithComplexEval)pos2.move(choices.get(i)), depth-1, alpha, beta), beta);
-					
-				if(beta <= alpha) {
-					break;
+			if( prevBestMoveIndex >= 0) {
+				double tmp = getMoveUtil((PositionWithComplexEval)pos2.move(choices.get(prevBestMoveIndex)), depth-1, alpha, beta);
+				
+				if(tmp < beta) {
+					nextBestMoveIndex = prevBestMoveIndex;
 				}
+				beta = Math.min(tmp, beta);
+				
+			}
+			
+			//get min util for next turn:
+			for(int i=0; i<choices.size() && alpha < beta; i++) {
+				
+				double tmp = getMoveUtil((PositionWithComplexEval)pos2.move(choices.get(i)), depth-1, alpha, beta);
+				
+				if(tmp < beta) {
+					nextBestMoveIndex = i;
+				}
+				
+				beta = Math.min(tmp, beta);
+				
 				
 			}
 			
 			ret = beta;
 		}
 		
-
-		// TODO: make this non-static.
 		//Add to the refutationTable:
 		boolean wasPrunedBeforeFullyCalc = (beta <= alpha);
 		
 		
-		SimpleHashObjectWithDoubleUtil simpleObject = new SimpleHashObjectWithDoubleUtil(ret, wasPrunedBeforeFullyCalc, depth);
-		
+		HashObjectWithNextBestMoveAndDoubleUtil nextBestMoveHash = new HashObjectWithNextBestMoveAndDoubleUtil(ret, wasPrunedBeforeFullyCalc, depth, nextBestMoveIndex, pos2.getCurBackupHash());
+
+		// TODO: make this non-static.
 		if(refutationTable.containsKey(pos2.getCurHash())) {
 			refutationTable.remove(pos2.getCurHash());
 			debugNumElements--;
 		}
-		refutationTable.put(pos2.getCurHash(), simpleObject);
+		refutationTable.put(pos2.getCurHash(), nextBestMoveHash);
 		debugNumElements++;
 		
 		if(debugNumElements % DEBUG_MULT == 0) {
@@ -296,7 +371,8 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 	}
 	
 
-	public static final double INCONCLUSIVE = -1234567.0; 
+	public static final double INCONCLUSIVE = -1234567.0;
+	public static final double SMALL_DECIMAL = 0.0001;
 	
 	public static double handleNoMoveEdgeCase(PositionWithComplexEval pos2, int depth) {
 		
@@ -370,6 +446,11 @@ public class ComplexEvalHashAlphaBeta implements PlayerI {
 			tmp = mult * ( - REASONABLY_HIGH_NUMBER + sum + depth);
 		}
 	
+		
+		//Try to avoid infinite loops by encoraging the AI to fill in the blank:
+		//TODO: if this works: copy it to the other AIs.
+		tmp +=SMALL_DECIMAL * (pos2.getCurUtil() * depth);
+		
 		
 		if(keepTrying) {
 			return INCONCLUSIVE;
