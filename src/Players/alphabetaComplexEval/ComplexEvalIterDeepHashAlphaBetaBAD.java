@@ -36,6 +36,8 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 			prevBestIndex = getBestMoveIndex(pos2, i, this.getPlayerName(), prevBestIndex);
 		}
 		
+		System.out.println("Depth = " + this.depth);
+		
 		int tmpIndex = getBestMoveIndex(pos2, this.depth, this.getPlayerName(), prevBestIndex);
 		
 		System.out.println("Debug:");
@@ -46,7 +48,7 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 		debugNumElements = 0;
 		
 		
-		return pos.getMoveListReduced(pos2.isP1turn()).get(tmpIndex);
+		return pos2.getMoveListReduced(pos2.isP1turn()).get(tmpIndex);
 	}
 
 	@Override
@@ -75,12 +77,12 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 		
 		if(pos2.isP1turn()) {
 			//get max utility choice:
-			bestIndex = getMaxIndex(choices);
+			bestIndex = getMaxIndex(choices, prevBestMoveIndex);
 		
 		} else {
 			
 			//get min utility choice:
-			bestIndex = getMinIndex(choices);
+			bestIndex = getMinIndex(choices, prevBestMoveIndex);
 		}
 		
 		
@@ -89,8 +91,16 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 	}
 	
 	
-	public static int getMaxIndex(double choices[]) {
+	public static int getMaxIndex(double choices[], int prevBestIndex) {
+		
+		
 		int bestIndex = 0;
+
+		//Check prevBestIndex first because that's the first one iterdeepening checked:
+		if(prevBestIndex >= 0) {
+			bestIndex = prevBestIndex;
+		}
+		
 		
 		for(int i=0; i<choices.length; i++) {
 			if(choices[i] > choices[bestIndex]) {
@@ -101,8 +111,13 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 		return bestIndex;
 	}
 	
-	public static int getMinIndex(double choices[]) {
+	public static int getMinIndex(double choices[], int prevBestIndex) {
 		int bestIndex = 0;
+		
+		//Check prevBestIndex first because that's the first one iterdeepening checked:
+		if(prevBestIndex >= 0) {
+			bestIndex = prevBestIndex;
+		}
 		
 		for(int i=0; i<choices.length; i++) {
 			if(choices[i] < choices[bestIndex]) {
