@@ -9,7 +9,7 @@ import alphaBetaHash.HashObjectWithNextBestMoveAndDoubleUtil;
 import env.PositionCellGame;
 import env.SanityTestEnv;
 
-public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
+public class ComplexEvalIterDeepHashAlphaBeta implements PlayerI {
 
 	
 	public static HashMap<Long, HashObjectWithNextBestMoveAndDoubleUtil> refutationTable = new HashMap<Long, HashObjectWithNextBestMoveAndDoubleUtil>();
@@ -17,7 +17,7 @@ public class ComplexEvalIterDeepHashAlphaBetaBAD implements PlayerI {
 	public static int DEBUG_MULT = 10000;
 	public int depth;
 	
-	public ComplexEvalIterDeepHashAlphaBetaBAD(int depth) {
+	public ComplexEvalIterDeepHashAlphaBeta(int depth) {
 		this.depth = depth;
 	}
 

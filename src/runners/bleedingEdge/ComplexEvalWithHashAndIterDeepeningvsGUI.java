@@ -3,7 +3,7 @@ package runners.bleedingEdge;
 import Players.PlayerI;
 import Players.alphabetaComplexEval.ComplexEvalAlphaBeta;
 import Players.alphabetaComplexEval.ComplexEvalHashAlphaBeta;
-import Players.alphabetaComplexEval.ComplexEvalIterDeepHashAlphaBetaBAD;
+import Players.alphabetaComplexEval.ComplexEvalIterDeepHashAlphaBeta;
 import Players.alphabetapruning.HashAlphaBeta;
 import Players.alphabetapruning.IterDeepHashAlphaBeta;
 import Players.alphabetapruning.SimpleAlphaBeta;
@@ -17,7 +17,7 @@ public class ComplexEvalWithHashAndIterDeepeningvsGUI {
 		PlayerI players[] = new PlayerI[2];
 
 		players[0] = new GUIPlayer("Michael");
-		players[1] = new ComplexEvalIterDeepHashAlphaBetaBAD(4);
+		players[1] = new ComplexEvalIterDeepHashAlphaBeta(4);
 		
 		MainGame.playGame(players);
 	}
