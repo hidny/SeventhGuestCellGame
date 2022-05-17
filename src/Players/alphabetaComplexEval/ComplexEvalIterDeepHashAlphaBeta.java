@@ -48,6 +48,7 @@ public class ComplexEvalIterDeepHashAlphaBeta implements PlayerI {
 		debugNumMatches = 0;
 		debugNumElements = 0;
 		
+		//TODO: copy/paste this into other AIs:
 		//Anti-infinite loop measure:
 		if(shouldCloneBecauseItsGameOver(pos2, tmpIndex)) {
 			return getFirstCloneMoveIndex(pos2);
@@ -397,6 +398,12 @@ public class ComplexEvalIterDeepHashAlphaBeta implements PlayerI {
 	public static final double SMALL_DECIMAL = 0.0001;
 	public static final double MARGIN = 1000.0;
 	
+	
+
+	//TODO: copy/paste this into other AIs
+	// I corrected a bug...
+	//TODO: Maybe have it be called PositionCellGame
+	// The only reason I used the more complex position is because of a print statement.
 	public static double handleNoMoveEdgeCase(PositionWithComplexEval pos2, int depth) {
 		
 		//Edge case where player ran out of moves:
