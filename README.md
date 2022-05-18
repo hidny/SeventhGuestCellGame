@@ -28,7 +28,7 @@ For optimization purposes,
 I should also maybe work on representing the board with 2 longs.
 1 long for the binary flags for peg/no peg and 1 long for the binary flags of player1 peg vs player2 peg
 
-I could also make it compete with other people Ataxx AI.
+I could also make it compete with other people's Ataxx AI.
 (with the UAI protocol, It's the Universal Chess protocol, but for Ataxx)
 
 
