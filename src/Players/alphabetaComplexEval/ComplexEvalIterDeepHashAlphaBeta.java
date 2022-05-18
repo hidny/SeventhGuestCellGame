@@ -11,6 +11,11 @@ import env.SanityTestEnv;
 
 public class ComplexEvalIterDeepHashAlphaBeta implements PlayerI {
 
+	//TODO: maybe complex eval is just:
+	// (eval(prev pos) + eval(current Pos))/2
+	// But just 1 depth more
+	// Maybe experiment with this?
+	//or complicate the eval function
 	
 	public static HashMap<Long, HashObjectWithNextBestMoveAndDoubleUtil> refutationTable = new HashMap<Long, HashObjectWithNextBestMoveAndDoubleUtil>();
 
@@ -137,7 +142,7 @@ public class ComplexEvalIterDeepHashAlphaBeta implements PlayerI {
 	}
 	
 	public static final double REALLY_HIGH_NUMBER = 100000.0;
-	public static final String SPACE = "         ";
+	public static final String SPACE = "                          ";
 	public static final double REASONABLY_HIGH_NUMBER = 10000.0;
 	
 	public static double[] getUtilityOfAllMoves(PositionWithComplexEval pos2, int depth, int prevBestMoveIndex) {

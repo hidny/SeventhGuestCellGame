@@ -32,7 +32,11 @@ public class MainGame {
 	
 	//TODO: maybe if there's the same position twice, it's a draw?
 	
+	//Game is also known as ataxx
+	//https://en.wikipedia.org/wiki/Ataxx
+	//https://www.ataxx.org/
 	
+	//TODO: https://en.wikipedia.org/wiki/Late_move_reductions
 	
 	public static void main(String[] args) {
 //

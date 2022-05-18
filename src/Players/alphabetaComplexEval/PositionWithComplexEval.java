@@ -104,7 +104,7 @@ public class PositionWithComplexEval extends PositionCellGame {
 			}
 		}
 		
-		ret = ret + mult * 0.5 * bestVulnerability;
+		ret = ret + mult * 0.3 * bestVulnerability;
 		
 		return ret;
 	}
