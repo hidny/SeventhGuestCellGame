@@ -223,8 +223,6 @@ public class ComplexEvalIterDeepHashAlphaBeta implements PlayerI {
 		}
 		
 
-		//TODO: avoid infinite loop: (I had the AI do infinite jumps...)
-		// Maybe create a fractional util?
 		
 		return ret;
 		

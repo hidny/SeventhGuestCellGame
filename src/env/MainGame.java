@@ -13,12 +13,13 @@ public class MainGame {
 	//DONE: Maybe acknowledge that cloning the same location is just 1 move...
 	
 	//DONE: make a basic A* AI that also uses hashes
+	// DONE: And make sure the only diff is speed! (When hashes added)
+	// DONE: Also make sure there's no hash collisions. (use backup)
+	
 	//DONE: make the basic A* AI do iterative deepening.
 	
 	// ------------------------
 	
-	// TODO: And make sure the only diff is speed! (When hashes added)
-	// TODO: Also make sure there's no hash collisions. (use backup)
 
 	
 	//TODO: make the A* AI prioritize moving to the from location of where the opponent just
@@ -35,6 +36,8 @@ public class MainGame {
 	//Game is also known as ataxx
 	//https://en.wikipedia.org/wiki/Ataxx
 	//https://www.ataxx.org/
+	// There's a small game ai making community that I could be part of,
+	// but I'm not interested right now.
 	
 	//TODO: https://en.wikipedia.org/wiki/Late_move_reductions
 	
